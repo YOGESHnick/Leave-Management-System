@@ -7,16 +7,19 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using LeaveManagementWebApp.Data;
 using LeaveManagementWebApp.Models.LeaveTypes;
+using AutoMapper;
 
 namespace LeaveManagementWebApp.Controllers
 {
     public class LeaveTypesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMapper mapper;
 
-        public LeaveTypesController(ApplicationDbContext context)
+        public LeaveTypesController(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;
+            this.mapper = mapper;
         }
 
         // GET: LeaveTypes
@@ -24,12 +27,8 @@ namespace LeaveManagementWebApp.Controllers
         {
             // var Data =  SELECT * FROM LeaveTypes
             var data = await _context.LeavesTypes.ToListAsync();
-            // convert the datamodel into a view model
-            var viewData = data.Select( q=> new IndexVM{
-                Id = q.Id,
-                Name = q.Name,
-                NumberOfDays = q.NumberOfDays
-            });
+            // convert the datamodel into a view model - use AutoMapper
+            var viewData = mapper.Map<List<IndexVM>>(data);
             // return view model to the view
             return View(viewData);
         }
@@ -41,15 +40,15 @@ namespace LeaveManagementWebApp.Controllers
             {
                 return NotFound();
             }
-
+            
             var leaveType = await _context.LeavesTypes
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (leaveType == null)
             {
                 return NotFound();
             }
-
-            return View(leaveType);
+            var viewData = mapper.Map<IndexVM>(leaveType);
+            return View(viewData);
         }
 
         // GET: LeaveTypes/Create
