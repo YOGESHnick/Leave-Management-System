@@ -11,5 +11,6 @@ public class AutoMapperProfile: Profile
     {
         CreateMap<LeaveType, IndexVM>();
             // .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name));
+        CreateMap<LeaveTypeCreateVM, LeaveType>();
     }
 }
