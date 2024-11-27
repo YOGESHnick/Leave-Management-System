@@ -10,5 +10,6 @@ public class LeaveTypeCreateVM
     public String Name { get; set; } = String.Empty;
     [Required]
     [Range(1,90)]
+    [Display(Name ="Number of Days")]
     public int NumberOfDays { get; set; }
 }

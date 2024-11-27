@@ -64,6 +64,10 @@ namespace LeaveManagementWebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(LeaveTypeCreateVM leaveTypeCreate)
         {
+            if( await CheckIfLeaveTypeNameExists(leaveTypeCreate.Name) ){
+                ModelState.AddModelError(nameof(leaveTypeCreate.Name), "Name already exists in Database");
+                return View(leaveTypeCreate);
+            }
             if (ModelState.IsValid)
             {   
                 var leaveType = mapper.Map<LeaveType>(leaveTypeCreate);
@@ -104,6 +108,10 @@ namespace LeaveManagementWebApp.Controllers
                 return NotFound();
             }
 
+            if( await CheckIfLeaveTypeNameExistsForEdit(leaveTypeEdit) ){
+                ModelState.AddModelError(nameof(leaveTypeEdit.Name), "Name already exists in Database");
+                return View(leaveTypeEdit);
+            }
             if (ModelState.IsValid)
             {
                 try
@@ -143,7 +151,8 @@ namespace LeaveManagementWebApp.Controllers
                 return NotFound();
             }
 
-            return View(leaveType);
+            var viewData = mapper.Map<IndexVM>(leaveType);
+            return View(viewData);
         }
 
         // POST: LeaveTypes/Delete/5
@@ -164,6 +173,20 @@ namespace LeaveManagementWebApp.Controllers
         private bool LeaveTypeExists(int id)
         {
             return _context.LeavesTypes.Any(e => e.Id == id);
+        }
+
+        private async Task<bool> CheckIfLeaveTypeNameExists(string name)
+        {
+            var lowerCaseName = name.ToLower();
+            return await _context.LeavesTypes.AnyAsync(q => q.Name.ToLower().Equals(lowerCaseName));
+        }
+
+        private async Task<bool> CheckIfLeaveTypeNameExistsForEdit(LeaveTypeEditVM leaveTypeEdit)
+        {
+            var lowerCaseName = leaveTypeEdit.Name.ToLower();
+            return await _context.LeavesTypes.AnyAsync(
+                q => q.Name.ToLower().Equals(lowerCaseName) && q.Id != leaveTypeEdit.Id
+            );
         }
     }
 }
